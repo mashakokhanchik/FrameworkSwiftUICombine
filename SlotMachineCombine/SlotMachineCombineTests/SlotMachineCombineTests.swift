@@ -6,31 +6,56 @@
 //
 
 import XCTest
+import Combine
 @testable import SlotMachineCombine
 
 class SlotMachineCombineTests: XCTestCase {
+    
+    var cancellables = Set<AnyCancellable>()
+    var viewModel: SlotMachineModel!
 
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        viewModel = SlotMachineModel()
     }
 
     override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        cancellables = []
     }
 
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
+    func testButtonTextChanged() {
+        let expected = "Play"
+        let expectation = XCTestExpectation()
+        
+        viewModel
+            .$textButton
+            .dropFirst()
+            .sink { value in XCTAssertEqual(value, expected); expectation.fulfill() }
+            .store(in: &cancellables)
+        
+        viewModel.running = false
+        
+        wait(for: [expectation], timeout: 1)
     }
 
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
+    func testWon() {
+        let expected = "You won!!!"
+        let expectation = XCTestExpectation()
+        
+        viewModel
+            .$textTitle
+            .dropFirst()
+            .sink { value in XCTAssertEqual(value, expected); expectation.fulfill() }
+            .store(in: &cancellables)
+        
+        viewModel.slotEmoji1 = "❌"
+        viewModel.slotEmoji2 = "❌"
+        viewModel.slotEmoji3 = "❌"
+        
+        viewModel.running = false
+        viewModel.gameStart = true
+        
+        wait(for: [expectation], timeout: 1)
     }
-
 }
+
+
