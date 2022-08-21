@@ -70,6 +70,8 @@ struct CharactersView: View {
 
 }
 
+// MARK: - Screen content view
+
 struct CharactersView_Previews: PreviewProvider {
     
     static var previews: some View {

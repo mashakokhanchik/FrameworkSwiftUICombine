@@ -6,31 +6,40 @@
 //
 
 import XCTest
+import Combine
 @testable import Rick_MortyCombine
 
 class Rick_MortyCombineTests: XCTestCase {
+    
+    var viewModel: CharactersViewModel!
+    let apiClient = APIClient()
+    var subscriptions = Set<AnyCancellable>()
 
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        viewModel = CharactersViewModel()
     }
 
     override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        subscriptions = []
     }
 
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
-    }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
+    func testFilterText() throws {
+        /// Given
+        let expected = "Filter: alive, female"
+        var result = ""
+        
+        viewModel.$filterTags
+            .sink(receiveValue: { [weak self] _ in
+                result = self?.viewModel.filterText ?? ""})
+            .store(in: &subscriptions)
+        /// When
+        viewModel.filterTags = [.alive, .female]
+        viewModel.filterTags = []
+        /// Then
+        XCTAssert(
+            result == expected,
+            "Wrong header text. Expected: \(expected), result: \(result)"
+        )
     }
 
 }
